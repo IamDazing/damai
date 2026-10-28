@@ -98,7 +98,7 @@
         <div class="sendline"></div>
         <div class="payMethod">
           <div class="title">支付方式</div>
-          <div class="payMoney"><img :src="pay" alt=""><span>支付宝</span> <el-radio class="radioPay" value="1" size="large"></el-radio></div>
+          <div class="payMoney"><img :src="pay" alt=""><span>演示支付</span> <el-radio class="radioPay" value="1" size="large"></el-radio></div>
         </div>
         <div class="info">
           <div class="descript">由于票品为价票券，非普通商品，其背后承载的文化服务具有时效性、稀缺性等特征，一旦订购成功，不支持退换。</div>

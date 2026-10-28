@@ -41,6 +41,7 @@
       <div class="recommendHeader" v-if="isShowHeader">
         <router-link to="/index" class="routeHome" tag="div">首页</router-link>
         <router-link to="/allType/index" class="routeType" tag="div">分类</router-link>
+        <a href="/ai/" class="routeAi">AI 助手</a>
       </div>
       <div class="searchHeader" v-if="isShowHeader">
         <el-input
@@ -240,11 +241,12 @@ function getProgramSearchList() {
     width: 1200px;
     margin: 0 auto;
     height: 72px;
+    display: flex;
+    align-items: center;
 
     .link {
       img {
-        float: left;
-        margin-top: 10px;
+        display: block;
         width: 108px;
         height: 48px;
       }
@@ -282,13 +284,13 @@ function getProgramSearchList() {
     }
 
     .recommendHeader {
-      max-width: 220px;
       height: 100%;
-      float: left;
-      margin-right: -20px;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
       margin-left: 40px;
       line-height: 72px;
-      overflow: hidden;
+      white-space: nowrap;
 
       .routeHome {
         display: inline-block;
@@ -314,15 +316,39 @@ function getProgramSearchList() {
       .routeType.router-link-active {
         color: rgba(255, 55, 29, 0.85);
       }
+
+      .routeAi {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 34px;
+        padding: 0 14px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #ff4b38, #ff7b45);
+        box-shadow: 0 3px 10px rgba(255, 75, 56, 0.22);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1;
+        text-decoration: none;
+        white-space: nowrap;
+
+        &:hover {
+          background: linear-gradient(135deg, #f23625, #ff6335);
+        }
+
+        &:focus-visible {
+          outline: 2px solid #b52a1d;
+          outline-offset: 3px;
+        }
+      }
     }
 
     .searchHeader {
       width: 32%;
       height: 46px;
-      margin-top: 12px;
-      margin-left: 286px;
+      margin-left: auto;
       line-height: 46px;
-      float: left;
       position: relative;
 
       .input-with-search {
@@ -374,7 +400,7 @@ function getProgramSearchList() {
       min-width: 55px;
       height: 100%;
       position: relative;
-      float: right;
+      margin-left: auto;
       line-height: 72px;
 
       .box-left {

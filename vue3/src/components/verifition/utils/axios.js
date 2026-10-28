@@ -1,5 +1,4 @@
 import axios from 'axios';
-import {sign} from '@/utils/request.js'
 import { getToken } from '@/utils/auth'
 
 axios.defaults.baseURL = import.meta.env.VITE_APP_URL
@@ -13,11 +12,6 @@ const service = axios.create({
 })
 service.interceptors.request.use(
   config => {
-      //判断是否签名
-      const signFlag = import.meta.env.VITE_SIGN_FLAG
-      if (config.data != undefined && config.data != null && config.data != '' && signFlag == 1) {
-          config.data = sign(config.data)
-      }
       //向请求头放置token
       if (getToken) {
           let token = getToken();

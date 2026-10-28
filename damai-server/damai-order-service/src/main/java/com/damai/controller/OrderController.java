@@ -1,6 +1,10 @@
 package com.damai.controller;
 
 import com.damai.common.ApiResponse;
+import com.damai.constant.Constant;
+import com.damai.enums.BaseCode;
+import com.damai.exception.DaMaiFrameException;
+import com.damai.threadlocal.BaseParameterHolder;
 import com.damai.dto.AccountOrderCountDto;
 import com.damai.dto.OrderCancelDto;
 import com.damai.dto.OrderCreateDto;
@@ -63,6 +67,15 @@ public class OrderController {
     @Operation(summary  = "查看订单列表")
     @PostMapping(value = "/select/list")
     public ApiResponse<List<OrderListVo>> selectList(@Valid @RequestBody OrderListDto orderListDto) {
+        String userId = BaseParameterHolder.getParameter(Constant.USER_ID);
+        if (userId == null || userId.isBlank()) {
+            throw new DaMaiFrameException(BaseCode.LOGIN_USER_NOT_EXIST);
+        }
+        try {
+            orderListDto.setUserId(Long.parseLong(userId));
+        } catch (NumberFormatException e) {
+            throw new DaMaiFrameException(BaseCode.LOGIN_USER_NOT_EXIST);
+        }
         return ApiResponse.ok(orderService.selectList(orderListDto));
     }
     

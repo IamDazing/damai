@@ -1,5 +1,4 @@
 import axios from 'axios'
-import {jsrsasign,KJUR, hextob64} from "jsrsasign";
 import { getToken } from '@/utils/auth'
 import useUserStore from '@/store/modules/user'
 
@@ -10,17 +9,12 @@ export let isRelogin = { show: false };
 const request = axios.create({
     baseURL: import.meta.env.VITE_APP_BASE_API, // 这里设置为代理的路径
     timeout: 10000, // 请求超时时间
-    headers: import.meta.env.VITE_SIGN_FLAG == 1 ? {no_verify: false} : {no_verify: true}
+    headers: {no_verify: false}
 });
 
 // 请求拦截器
 request.interceptors.request.use(
     config => {
-        //判断是否签名
-        const signFlag = import.meta.env.VITE_SIGN_FLAG
-        if (config.data != undefined && config.data != null && config.data != '' && signFlag == 1) {
-            config.data = sign(config.data)
-        }
         //向请求头放置token
         if (getToken) {
             let token = getToken();
@@ -68,47 +62,5 @@ request.interceptors.response.use(
         return Promise.reject(error);
     }
 );
-
-export function sign(params){
-    const code = import.meta.env.VITE_CODE
-    const paramsStr = JSON.stringify(params)
-    const signParam = {businessBody: paramsStr, code: code}
-
-    const sig = new KJUR.crypto.Signature({alg: "SHA256withRSA"});
-    sig.init("-----BEGIN PRIVATE KEY-----"+import.meta.env.VITE_SIGN_SECRET_KEY+"-----END PRIVATE KEY-----");
-    sig.updateString(buildParam(signParam));
-    let sign = hextob64(sig.sign());
-
-    return {code: code, businessBody: paramsStr, sign: sign};
-}
-
-const buildKeyValue = (key, value, isEncode) => {
-    let result = `${key}=`;
-    if (isEncode) {
-        try {
-            result += encodeURIComponent(value);
-        } catch (error) {
-            result += value;
-        }
-    } else {
-        result += value;
-    }
-    return result;
-};
-
-const buildParam = (params) => {
-    const keys = Object.keys(params).sort();
-    let queryString = '';
-
-    keys.forEach((key, index) => {
-        const value = params[key];
-        queryString += buildKeyValue(key, value, false);
-        if (index < keys.length - 1) {
-            queryString += '&';
-        }
-    });
-
-    return queryString;
-};
 
 export default request

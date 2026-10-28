@@ -15,5 +15,8 @@ public class OrderListDto {
     @Schema(name ="userId", type ="Long", description ="用户id", requiredMode= RequiredMode.REQUIRED)
     @NotNull
     private Long userId;
+
+    @Schema(description = "仅校验当前登录状态，不查询订单")
+    private Boolean sessionOnly;
     
 }

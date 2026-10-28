@@ -29,4 +29,13 @@ class OrderIdentityTest {
         OrderListDto dto = new OrderListDto(); dto.setUserId(123L);
         assertThrows(DaMaiFrameException.class, () -> controller.selectList(dto));
     }
+    @Test void sessionCheckDoesNotQueryOrders() {
+        OrderService service = mock(OrderService.class);
+        OrderController controller = new OrderController();
+        ReflectionTestUtils.setField(controller, "orderService", service);
+        OrderListDto dto = new OrderListDto(); dto.setUserId(0L); dto.setSessionOnly(true);
+        BaseParameterHolder.setParameter(Constant.USER_ID, "123");
+        assertTrue(controller.selectList(dto).getData().isEmpty());
+        verifyNoInteractions(service);
+    }
 }

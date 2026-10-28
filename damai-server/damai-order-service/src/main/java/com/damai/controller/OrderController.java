@@ -76,6 +76,9 @@ public class OrderController {
         } catch (NumberFormatException e) {
             throw new DaMaiFrameException(BaseCode.LOGIN_USER_NOT_EXIST);
         }
+        if (Boolean.TRUE.equals(orderListDto.getSessionOnly())) {
+            return ApiResponse.ok(List.of());
+        }
         return ApiResponse.ok(orderService.selectList(orderListDto));
     }
     

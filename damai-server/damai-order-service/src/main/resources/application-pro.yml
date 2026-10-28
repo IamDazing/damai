@@ -1,0 +1,4 @@
+# 支付宝回调地址
+orderPayNotifyUrl: ${ORDER_PAY_NOTIFY_URL:}
+# 支付成功页面
+orderPayReturnUrl: ${ORDER_PAY_RETURN_URL:}

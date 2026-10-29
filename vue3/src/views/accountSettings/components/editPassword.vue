@@ -3,7 +3,10 @@
   <el-row>
     <el-form ref="editPsdRef" :model="editPsdForm" :rules="editPsdRules" class="login-form">
       <el-col :span="24">
-        <el-form-item label="输入密码:" prop="password" >
+        <el-form-item label="原密码:" prop="oldPassword">
+          <el-input v-model="editPsdForm.oldPassword" type="password" show-password />
+        </el-form-item>
+        <el-form-item label="新密码:" prop="password" >
           <el-input
               v-model="editPsdForm.password"
               class="input-with-select"
@@ -38,20 +41,24 @@ import useUserStore from '@/store/modules/user'
 const router = useRouter();
 const userStore = useUserStore()
 const editPsdForm = ref({
+  oldPassword: '',
   password: '',
   id: getUserIdKey()
 })
-const editPsdRules = reactive([
-  {
+const editPsdRules = reactive({
+  oldPassword: [{ required: true, message: '请输入原密码', trigger: 'blur' }],
+  password: [{
     required: true,
     pattern: /^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$)([^\u4e00-\u9fa5\s]){6,20}$/,
-    message: '6-20位英文字母、数字或者符号（除空格），且字母、数字和标点符号至少包含两种',
-    trigger: ['blur', 'focus']
-  }
-])
+    message: '6-20位英文字母、数字或者符号（除空格），且至少包含两种',
+    trigger: 'blur'
+  }]
+})
+const editPsdRef = ref(null)
 
 
-function savePsd() {
+async function savePsd() {
+  if (!await editPsdRef.value.validate().catch(() => false)) return
   getEditPsd(editPsdForm.value).then(response=>{
     if(response.code == '0'){
       ElMessage({

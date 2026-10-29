@@ -257,12 +257,15 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     }
     @Transactional(rollbackFor = Exception.class)
     public void updatePassword(UserUpdatePasswordDto userUpdatePasswordDto){
-        User user = userMapper.selectById(userUpdatePasswordDto.getId());
+        User user = userMapper.selectOne(Wrappers.lambdaQuery(User.class)
+                .eq(User::getId, userUpdatePasswordDto.getId())
+                .eq(User::getPassword, userUpdatePasswordDto.getOldPassword()));
         if (Objects.isNull(user)) {
-            throw new DaMaiFrameException(BaseCode.USER_EMPTY);
+            throw new DaMaiFrameException(BaseCode.NAME_PASSWORD_ERROR);
         }
         User updateUser = new User();
-        BeanUtil.copyProperties(userUpdatePasswordDto,updateUser);
+        updateUser.setId(userUpdatePasswordDto.getId());
+        updateUser.setPassword(userUpdatePasswordDto.getPassword());
         userMapper.updateById(updateUser);
     }
     @Transactional(rollbackFor = Exception.class)

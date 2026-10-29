@@ -23,6 +23,10 @@ public class UserUpdatePasswordDto implements Serializable {
     @NotNull
     private Long id;
     
+    @Schema(name ="oldPassword", type ="String", description ="原密码", requiredMode= RequiredMode.REQUIRED)
+    @NotBlank
+    private String oldPassword;
+
     @Schema(name ="password", type ="String", description ="密码",requiredMode= RequiredMode.REQUIRED)
     @NotBlank
     private String password;

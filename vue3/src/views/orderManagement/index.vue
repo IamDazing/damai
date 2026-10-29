@@ -30,7 +30,7 @@
             <li>{{ order.ticketCount }}</li>
             <li><div class="price">￥ {{ order.orderPrice }}</div><div class="money">(含运费￥0.00)</div></li>
             <li>
-              <div class="orderStatus">{{ getOrderStatus(order.orderStatus) }}</div>
+              <div class="orderStatus">{{ getOrderStatus(order.orderStatus, order.payOrderType) }}</div>
               <router-link class=" link" :to="{name:'orderDetail',params:{orderNumber:order.orderNumber}}"  >
                 订单详情
               </router-link>
@@ -76,7 +76,7 @@ const getOrderList = () => {
   })
 }
 
-function getOrderStatus(orderStatus){
+function getOrderStatus(orderStatus, payOrderType){
   if (orderStatus == 1) {
     return '未支付';
   }
@@ -84,7 +84,7 @@ function getOrderStatus(orderStatus){
     return '交易关闭';
   }
   if (orderStatus == 3) {
-    return '已支付';
+    return payOrderType == 99 ? '已支付（模拟）' : '已支付';
   }
   if (orderStatus == 4) {
     return '交易关闭';

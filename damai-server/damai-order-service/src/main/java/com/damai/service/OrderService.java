@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.damai.client.PayClient;
 import com.damai.client.UserClient;
 import com.damai.common.ApiResponse;
+import com.damai.constant.Constant;
 import com.damai.core.RedisKeyManage;
 import com.damai.dto.AccountOrderCountDto;
 import com.damai.dto.NotifyDto;
@@ -52,6 +53,7 @@ import com.damai.servicelock.annotion.ServiceLock;
 import com.damai.util.DateUtils;
 import com.damai.util.ServiceLockTool;
 import com.damai.util.StringUtil;
+import com.damai.threadlocal.BaseParameterHolder;
 import com.damai.vo.AccountOrderCountVo;
 import com.damai.vo.NotifyVo;
 import com.damai.vo.OrderGetVo;
@@ -174,6 +176,9 @@ public class OrderService extends ServiceImpl<OrderMapper, Order> {
     }
     
     public String pay(OrderPayDto orderPayDto) {
+        if ("demo".equals(orderPayDto.getChannel())) {
+            return orderService.simulatePay(orderPayDto);
+        }
         Long orderNumber = orderPayDto.getOrderNumber();
         LambdaQueryWrapper<Order> orderLambdaQueryWrapper =
                 Wrappers.lambdaQuery(Order.class).eq(Order::getOrderNumber, orderNumber);
@@ -199,6 +204,39 @@ public class OrderService extends ServiceImpl<OrderMapper, Order> {
             throw new DaMaiFrameException(payResponse);
         }
         return payResponse.getData();
+    }
+
+    /** Demo payments are explicitly enabled and remain distinguishable from real payments. */
+    @ServiceLock(name = UPDATE_ORDER_STATUS_LOCK, keys = {"#dto.orderNumber"})
+    @Transactional(rollbackFor = Exception.class)
+    public String simulatePay(OrderPayDto dto) {
+        if (!orderProperties.isDemoPaymentEnabled()) {
+            throw new DaMaiFrameException("模拟支付未开启");
+        }
+        String userId = BaseParameterHolder.getParameter(Constant.USER_ID);
+        if (userId == null || userId.isBlank()) throw new DaMaiFrameException(BaseCode.LOGIN_USER_NOT_EXIST);
+        Order order = orderMapper.selectOne(Wrappers.lambdaQuery(Order.class).eq(Order::getOrderNumber, dto.getOrderNumber()));
+        if (order == null || !String.valueOf(order.getUserId()).equals(userId)) {
+            throw new DaMaiFrameException(BaseCode.ORDER_NOT_EXIST);
+        }
+        if (Objects.equals(order.getOrderStatus(), OrderStatus.PAY.getCode()) && Objects.equals(order.getPayOrderType(), 99)) {
+            return "DEMO_PAID";
+        }
+        checkOrderStatus(order);
+        if (!Objects.equals(order.getOrderStatus(), OrderStatus.NO_PAY.getCode())) {
+            throw new DaMaiFrameException(BaseCode.OPERATE_ORDER_STATUS_NOT_PERMIT);
+        }
+        if (dto.getPrice() == null || order.getOrderPrice() == null || dto.getPrice().compareTo(order.getOrderPrice()) != 0) {
+            throw new DaMaiFrameException(BaseCode.PAY_PRICE_NOT_EQUAL_ORDER_PRICE);
+        }
+        orderService.updateOrderRelatedData(order.getOrderNumber(), OrderStatus.PAY);
+        Order marker = new Order(); marker.setPayOrderType(99);
+        OrderTicketUser ticketMarker = new OrderTicketUser(); ticketMarker.setPayOrderType(99);
+        if (orderMapper.update(marker, Wrappers.lambdaUpdate(Order.class).eq(Order::getOrderNumber, order.getOrderNumber())) <= 0 ||
+                orderTicketUserMapper.update(ticketMarker, Wrappers.lambdaUpdate(OrderTicketUser.class).eq(OrderTicketUser::getOrderNumber, order.getOrderNumber())) <= 0) {
+            throw new DaMaiFrameException("标记模拟支付失败");
+        }
+        return "DEMO_PAID";
     }
     
     private PayDto getPayDto(OrderPayDto orderPayDto, Long orderNumber) {

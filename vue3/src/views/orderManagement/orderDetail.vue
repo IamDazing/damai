@@ -6,7 +6,7 @@
       <div class="orderNum" v-if="orderData[0]" >订单号: {{orderData[0].orderNumber}}</div>
       <div class="isPay" v-if="orderData[0]&&orderData[0].orderStatus == 1"><span>未支付</span><span>需付款: <span>￥{{orderData[0].orderPrice}}</span></span></div>
       <div class="isPay" v-if="orderData[0]&&orderData[0].orderStatus == 2">交易关闭<span>需付款: <span>￥{{orderData[0].orderPrice}}</span></span></div>
-      <div class="isPay" v-if="orderData[0]&&orderData[0].orderStatus == 3"><span>已支付</span> <span>实付款: <span>￥{{orderData[0].orderPrice}}</span></span></div>
+      <div class="isPay" v-if="orderData[0]&&orderData[0].orderStatus == 3"><span>{{ orderData[0].payOrderType == 99 ? '已支付（模拟）' : '已支付' }}</span> <span>{{ orderData[0].payOrderType == 99 ? '订单金额' : '实付款' }}: <span>￥{{orderData[0].orderPrice}}</span></span></div>
       <div class="isPay" v-if="orderData[0]&&orderData[0].orderStatus == 4">交易关闭<span>需付款: <span>￥{{orderData[0].orderPrice}}</span></span></div>
       <div class="program-table">
         <el-table :data="orderData" border style="width: 100%" class="tableCloumn">

@@ -22,4 +22,7 @@ public class OrderProperties {
      * */
     @Value("${orderPayReturnUrl:http://localhost:5173/order/paySuccess}")
     private String orderPayReturnUrl;
+
+    @Value("${damai.demo-payment.enabled:false}")
+    private boolean demoPaymentEnabled;
 }

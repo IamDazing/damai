@@ -43,7 +43,7 @@
     <el-dialog v-model="showSimulation" title="直接支付" width="min(420px, 92vw)" align-center>
       <div class="simulation-content">
         <p>将模拟一次支付流程，不会实际扣款或生成有效票券。</p>
-        <p class="notice">本次仅为演示，订单仍保持未支付状态。</p>
+        <p class="notice">确认后订单将标记为已支付（模拟），不会产生真实交易。</p>
       </div>
       <template #footer>
         <el-button @click="backToChoices('simulation')">返回选择</el-button>
@@ -53,8 +53,8 @@
 
     <el-dialog v-model="showResult" title="模拟完成" width="min(420px, 92vw)" align-center>
       <div class="simulation-content">
-        <p class="result-title">模拟支付流程已完成</p>
-        <p class="notice">未发生实际扣款，也未生成有效票券；订单状态仍为未支付。</p>
+        <p class="result-title">模拟支付成功</p>
+        <p class="notice">订单已标记为已支付（模拟），未发生实际扣款，不代表真实购票成功。</p>
       </div>
       <template #footer>
         <el-button @click="showResult = false">留在当前页</el-button>
@@ -65,11 +65,13 @@
 </template>
 
 <script setup name="PayMethod">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Header from '@/components/header/index'
 import Footer from '@/components/footer/index'
 import supportQr from '@/assets/section/support-alipay.jpg'
+import { getOrderListApi, orderPayApi } from '@/api/order.js'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const orderNumber = ref('')
@@ -78,13 +80,11 @@ const showSupport = ref(false)
 const showSimulation = ref(false)
 const showResult = ref(false)
 const simulating = ref(false)
-let simulationTimer
 
 onMounted(() => {
   orderNumber.value = history.state?.orderNumber || ''
   showChoices.value = Boolean(orderNumber.value)
 })
-onBeforeUnmount(() => clearTimeout(simulationTimer))
 
 function openSupport() {
   showChoices.value = false
@@ -100,14 +100,25 @@ function backToChoices(source) {
   else showSimulation.value = false
   showChoices.value = true
 }
-function simulatePayment() {
+async function simulatePayment() {
   if (simulating.value) return
   simulating.value = true
-  simulationTimer = setTimeout(() => {
+  try {
+    const list = await getOrderListApi({ userId: 0 })
+    if (String(list.code) !== '0' || !Array.isArray(list.data)) throw new Error(list.message || '获取订单失败')
+    const order = list.data.find(item => String(item.orderNumber) === String(orderNumber.value))
+    if (!order) throw new Error('未找到当前账号的订单')
+    const result = await orderPayApi({ platform: 3, orderNumber: orderNumber.value, subject: order.programTitle,
+      price: order.orderPrice, channel: 'demo', payBillType: 1 })
+    if (String(result.code) !== '0' || result.data !== 'DEMO_PAID') throw new Error(result.message || '模拟支付失败')
     simulating.value = false
     showSimulation.value = false
     showResult.value = true
-  }, 700)
+  } catch (error) {
+    ElMessage.error(error?.message || '模拟支付失败，请稍后再试')
+  } finally {
+    simulating.value = false
+  }
 }
 </script>
 

@@ -292,7 +292,8 @@ public class RequestValidationFilter implements GlobalFilter, Ordered {
         // Account data must always be protected, even if external configuration omits it.
         PathMatcher accountMatcher = new AntPathMatcher();
         for (String path : new String[]{"/**/user/get/id", "/**/user/update", "/**/user/update/password",
-                "/**/user/update/email", "/**/user/update/mobile", "/**/user/authentication"}) {
+                "/**/user/update/email", "/**/user/update/mobile", "/**/user/authentication",
+                "/**/order/pay/check"}) {
             if (accountMatcher.match(path, url)) return false;
         }
         for (String skipCheckTokenPath : gatewayProperty.getCheckTokenPaths()) {

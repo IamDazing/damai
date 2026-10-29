@@ -183,9 +183,7 @@ public class OrderService extends ServiceImpl<OrderMapper, Order> {
         LambdaQueryWrapper<Order> orderLambdaQueryWrapper =
                 Wrappers.lambdaQuery(Order.class).eq(Order::getOrderNumber, orderNumber);
         Order order = orderMapper.selectOne(orderLambdaQueryWrapper);
-        if (Objects.isNull(order)) {
-            throw new DaMaiFrameException(BaseCode.ORDER_NOT_EXIST);
-        }
+        requireOwnOrder(order);
         if (Objects.equals(order.getOrderStatus(), OrderStatus.CANCEL.getCode())) {
             throw new DaMaiFrameException(BaseCode.ORDER_CANCEL);
         }
@@ -261,9 +259,7 @@ public class OrderService extends ServiceImpl<OrderMapper, Order> {
         LambdaQueryWrapper<Order> orderLambdaQueryWrapper =
                 Wrappers.lambdaQuery(Order.class).eq(Order::getOrderNumber, orderPayCheckDto.getOrderNumber());
         Order order = orderMapper.selectOne(orderLambdaQueryWrapper);
-        if (Objects.isNull(order)) {
-            throw new DaMaiFrameException(BaseCode.ORDER_NOT_EXIST);
-        }
+        requireOwnOrder(order);
         BeanUtil.copyProperties(order,orderPayCheckVo);
         if (Objects.equals(order.getOrderStatus(), OrderStatus.CANCEL.getCode())) {
             RefundDto refundDto = new RefundDto();
@@ -553,9 +549,7 @@ public class OrderService extends ServiceImpl<OrderMapper, Order> {
         LambdaQueryWrapper<Order> orderLambdaQueryWrapper =
                 Wrappers.lambdaQuery(Order.class).eq(Order::getOrderNumber, orderGetDto.getOrderNumber());
         Order order = orderMapper.selectOne(orderLambdaQueryWrapper);
-        if (Objects.isNull(order)) {
-            throw new DaMaiFrameException(BaseCode.ORDER_NOT_EXIST);
-        }
+        requireOwnOrder(order);
         LambdaQueryWrapper<OrderTicketUser> orderTicketUserLambdaQueryWrapper = 
                 Wrappers.lambdaQuery(OrderTicketUser.class).eq(OrderTicketUser::getOrderNumber, order.getOrderNumber());
         List<OrderTicketUser> orderTicketUserList = orderTicketUserMapper.selectList(orderTicketUserLambdaQueryWrapper);
@@ -650,13 +644,21 @@ public class OrderService extends ServiceImpl<OrderMapper, Order> {
     public boolean initiateCancel(OrderCancelDto orderCancelDto){
         Order order = orderMapper.selectOne(Wrappers.lambdaQuery(Order.class)
                 .eq(Order::getOrderNumber, orderCancelDto.getOrderNumber()));
-        if (Objects.isNull(order)) {
-            throw new DaMaiFrameException(BaseCode.ORDER_NOT_EXIST);
-        }
+        requireOwnOrder(order);
         if (!Objects.equals(order.getOrderStatus(), OrderStatus.NO_PAY.getCode())) {
             throw new DaMaiFrameException(BaseCode.CAN_NOT_CANCEL);
         }
         return cancel(orderCancelDto);
+    }
+
+    private void requireOwnOrder(Order order) {
+        String currentUserId = BaseParameterHolder.getParameter(Constant.USER_ID);
+        if (currentUserId == null || currentUserId.isBlank()) {
+            throw new DaMaiFrameException(BaseCode.LOGIN_USER_NOT_EXIST);
+        }
+        if (order == null || order.getUserId() == null || !order.getUserId().toString().equals(currentUserId)) {
+            throw new DaMaiFrameException(BaseCode.ORDER_NOT_EXIST);
+        }
     }
     
     

@@ -1,6 +1,10 @@
 package com.damai.controller;
 
 import com.damai.common.ApiResponse;
+import com.damai.constant.Constant;
+import com.damai.enums.BaseCode;
+import com.damai.exception.DaMaiFrameException;
+import com.damai.threadlocal.BaseParameterHolder;
 import com.damai.dto.UserAuthenticationDto;
 import com.damai.dto.UserExistDto;
 import com.damai.dto.UserGetAndTicketUserListDto;
@@ -46,6 +50,7 @@ public class UserController {
     @Operation(summary  = "查询(通过id)")
     @PostMapping(value = "/get/id")
     public ApiResponse<UserVo> getById(@Valid @RequestBody UserIdDto userIdDto){
+        requireOwnAccount(userIdDto.getId());
         return ApiResponse.ok(userService.getById(userIdDto));
     }
     
@@ -77,6 +82,7 @@ public class UserController {
     @Operation(summary  = "修改个人信息")
     @PostMapping(value = "/update")
     public ApiResponse<Void> update(@Valid @RequestBody UserUpdateDto userUpdateDto) {
+        requireOwnAccount(userUpdateDto.getId());
         userService.update(userUpdateDto);
         return ApiResponse.ok();
     }
@@ -84,6 +90,7 @@ public class UserController {
     @Operation(summary  = "修改密码")
     @PostMapping(value = "/update/password")
     public ApiResponse<Void> updatePassword(@Valid @RequestBody UserUpdatePasswordDto userUpdatePasswordDto) {
+        requireOwnAccount(userUpdatePasswordDto.getId());
         userService.updatePassword(userUpdatePasswordDto);
         return ApiResponse.ok();
     }
@@ -91,6 +98,7 @@ public class UserController {
     @Operation(summary  = "修改邮箱")
     @PostMapping(value = "/update/email")
     public ApiResponse<Void> updateEmail(@Valid @RequestBody UserUpdateEmailDto userUpdateEmailDto) {
+        requireOwnAccount(userUpdateEmailDto.getId());
         userService.updateEmail(userUpdateEmailDto);
         return ApiResponse.ok();
     }
@@ -98,6 +106,7 @@ public class UserController {
     @Operation(summary  = "修改手机号")
     @PostMapping(value = "/update/mobile")
     public ApiResponse<Void> updateMobile(@Valid @RequestBody UserUpdateMobileDto userUpdateMobileDto) {
+        requireOwnAccount(userUpdateMobileDto.getId());
         userService.updateMobile(userUpdateMobileDto);
         return ApiResponse.ok();
     }
@@ -105,6 +114,7 @@ public class UserController {
     @Operation(summary  = "实名认证")
     @PostMapping(value = "/authentication")
     public ApiResponse<Void> authentication(@Valid @RequestBody UserAuthenticationDto userAuthenticationDto) {
+        requireOwnAccount(userAuthenticationDto.getId());
         userService.authentication(userAuthenticationDto);
         return ApiResponse.ok();
     }
@@ -114,6 +124,16 @@ public class UserController {
     @PostMapping(value = "/get/user/ticket/list")
     public ApiResponse<UserGetAndTicketUserListVo> getUserAndTicketUserList(@Valid @RequestBody UserGetAndTicketUserListDto userGetAndTicketUserListDto) {
         return ApiResponse.ok(userService.getUserAndTicketUserList(userGetAndTicketUserListDto));
+    }
+
+    private void requireOwnAccount(Long accountId) {
+        String currentUserId = BaseParameterHolder.getParameter(Constant.USER_ID);
+        if (currentUserId == null || currentUserId.isBlank()) {
+            throw new DaMaiFrameException(BaseCode.LOGIN_USER_NOT_EXIST);
+        }
+        if (accountId == null || !accountId.toString().equals(currentUserId)) {
+            throw new DaMaiFrameException(BaseCode.USER_EMPTY);
+        }
     }
     
     

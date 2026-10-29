@@ -192,6 +192,11 @@ public class UserService extends ServiceImpl<UserMapper, User> {
                 .eq(User::getId, userId).eq(User::getPassword, password);
         User user = userMapper.selectOne(queryUserWrapper);
         if (Objects.isNull(user)) {
+            RedisKeyBuild errorKey = StringUtil.isNotEmpty(mobile)
+                    ? RedisKeyBuild.createRedisKey(RedisKeyManage.LOGIN_USER_MOBILE_ERROR, mobile)
+                    : RedisKeyBuild.createRedisKey(RedisKeyManage.LOGIN_USER_EMAIL_ERROR, email);
+            redisCache.incrBy(errorKey, 1);
+            redisCache.expire(errorKey, 1, TimeUnit.MINUTES);
             throw new DaMaiFrameException(BaseCode.NAME_PASSWORD_ERROR);
         }
         redisCache.set(RedisKeyBuild.createRedisKey(RedisKeyManage.USER_LOGIN,code,user.getId()),user,

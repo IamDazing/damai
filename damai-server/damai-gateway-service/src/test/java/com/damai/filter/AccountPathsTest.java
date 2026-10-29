@@ -17,5 +17,8 @@ class AccountPathsTest {
         assertTrue(filter.skipCheckToken("/damai/user/user/login"));
         assertTrue(filter.skipCheckToken("/damai/user/user/register"));
         assertFalse(filter.skipCheckToken("/damai/order/order/pay/check"));
+        for (String path : new String[]{"list", "add", "delete"}) {
+            assertFalse(filter.skipCheckToken("/damai/user/ticket/user/" + path), path);
+        }
     }
 }

@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.damai.core.RedisKeyManage;
+import com.damai.constant.Constant;
+import com.damai.threadlocal.BaseParameterHolder;
 import com.damai.dto.TicketUserDto;
 import com.damai.dto.TicketUserIdDto;
 import com.damai.dto.TicketUserListDto;
@@ -80,8 +82,10 @@ public class TicketUserService extends ServiceImpl<TicketUserMapper, TicketUser>
     }
     @Transactional(rollbackFor = Exception.class)
     public void delete(TicketUserIdDto ticketUserIdDto) {
+        String currentUserId = BaseParameterHolder.getParameter(Constant.USER_ID);
+        if (currentUserId == null || currentUserId.isBlank()) throw new DaMaiFrameException(BaseCode.LOGIN_USER_NOT_EXIST);
         TicketUser ticketUser = ticketUserMapper.selectById(ticketUserIdDto.getId());
-        if (Objects.isNull(ticketUser)) {
+        if (Objects.isNull(ticketUser) || ticketUser.getUserId() == null || !ticketUser.getUserId().toString().equals(currentUserId)) {
             throw new DaMaiFrameException(BaseCode.TICKET_USER_EMPTY);
         }
         ticketUserMapper.deleteById(ticketUserIdDto.getId());

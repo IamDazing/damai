@@ -36,7 +36,7 @@ public interface UserClient {
      * @param dto 参数
      * @return 结果
      * */
-    @PostMapping(value = "/ticket/user/list")
+    @PostMapping(value = "/ticket/user/list/internal")
     ApiResponse<List<TicketUserVo>> list(TicketUserListDto dto);
     
     /**

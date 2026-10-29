@@ -293,7 +293,7 @@ public class RequestValidationFilter implements GlobalFilter, Ordered {
         PathMatcher accountMatcher = new AntPathMatcher();
         for (String path : new String[]{"/**/user/get/id", "/**/user/update", "/**/user/update/password",
                 "/**/user/update/email", "/**/user/update/mobile", "/**/user/authentication",
-                "/**/order/pay/check"}) {
+                "/**/order/pay/check", "/**/ticket/user/list", "/**/ticket/user/add", "/**/ticket/user/delete"}) {
             if (accountMatcher.match(path, url)) return false;
         }
         for (String skipCheckTokenPath : gatewayProperty.getCheckTokenPaths()) {

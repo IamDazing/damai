@@ -322,7 +322,7 @@ public class OrderService extends ServiceImpl<OrderMapper, Order> {
             String requestBody = customizeRequestWrapper.getRequestBody();
             params = StringUtil.convertQueryStringToMap(requestBody);
         }
-        log.info("收到支付宝回调通知 params : {}",JSON.toJSONString(params));
+        log.info("收到支付宝回调通知");
         String outTradeNo = params.get("out_trade_no");
         if (StringUtil.isEmpty(outTradeNo)) {
             return "failure";

@@ -69,4 +69,4 @@ rules:
           strategy: complex
           algorithmClassName: com.damai.shardingsphere.TableOrderComplexGeneArithmetic
 props:
-  sql-show: true
+  sql-show: false

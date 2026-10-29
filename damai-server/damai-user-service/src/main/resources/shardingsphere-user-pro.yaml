@@ -115,4 +115,4 @@ rules:
           sm4-iv: YOUR_32_HEX_SM4_IV
           sm4-padding: PKCS7Padding
 props:
-  sql-show: true
+  sql-show: false

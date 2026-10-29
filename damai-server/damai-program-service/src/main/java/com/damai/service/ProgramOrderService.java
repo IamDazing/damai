@@ -323,7 +323,7 @@ public class ProgramOrderService {
     private String createOrderByRpc(OrderCreateDto orderCreateDto,List<SeatVo> purchaseSeatList){
         ApiResponse<String> createOrderResponse = orderClient.create(orderCreateDto);
         if (!Objects.equals(createOrderResponse.getCode(), BaseCode.SUCCESS.getCode())) {
-            log.error("创建订单失败 需人工处理 orderCreateDto : {}",JSON.toJSONString(orderCreateDto));
+            log.error("创建订单失败，需人工处理，订单号：{}", orderCreateDto.getOrderNumber());
             updateProgramCacheDataResolution(orderCreateDto.getProgramId(),purchaseSeatList,OrderStatus.CANCEL);
             throw new DaMaiFrameException(createOrderResponse);
         }
@@ -340,7 +340,7 @@ public class ProgramOrderService {
             latch.countDown();
         },ex -> {
             log.error("创建订单kafka发送消息失败 error",ex);
-            log.error("创建订单失败 需人工处理 orderCreateDto : {}",JSON.toJSONString(orderCreateDto));
+            log.error("创建订单失败，需人工处理，订单号：{}", orderCreateDto.getOrderNumber());
             updateProgramCacheDataResolution(orderCreateDto.getProgramId(),purchaseSeatList,OrderStatus.CANCEL);
             createOrderMqDomain.daMaiFrameException = new DaMaiFrameException(ex);
             latch.countDown();

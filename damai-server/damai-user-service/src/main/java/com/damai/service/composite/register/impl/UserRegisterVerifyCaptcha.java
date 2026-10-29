@@ -44,7 +44,7 @@ public class UserRegisterVerifyCaptcha extends AbstractUserRegisterCheckHandler 
             if (StringUtil.isEmpty(param.getCaptchaVerification())) {
                 throw new DaMaiFrameException(BaseCode.VERIFY_CAPTCHA_EMPTY);
             }
-            log.info("传入的captchaVerification:{}",param.getCaptchaVerification());
+            log.info("开始校验注册验证码");
             CaptchaVO captchaVO = new CaptchaVO();
             captchaVO.setCaptchaVerification(param.getCaptchaVerification());
             ResponseModel responseModel = captchaHandle.verification(captchaVO);

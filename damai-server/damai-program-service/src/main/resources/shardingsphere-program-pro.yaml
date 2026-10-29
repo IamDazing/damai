@@ -114,4 +114,4 @@ rules:
         props:
           algorithm-expression: d_ticket_category_${(program_id.intdiv(2)) % 2}
 props:
-  sql-show: true
+  sql-show: false
